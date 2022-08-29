@@ -5,19 +5,19 @@ import seaborn as sns
 """
     - Rinovirus = 10/h quanta
     - Sarampo = 570/h quanta
+    - COVID = 141/h quanta
 """
-
 
 # Constantes:
 
-C = 400 # ppm
-Co = 350 #ppm
-Ca = 37500 # ppm
+C = 465 # ppm (Ambiente Interno)
+Co = 419 #ppm (Ambiente Externo)
+Ca =  640 # ppm (Fração volumétrica de CO 2 adicionada ao ar expirado durante a respiração)
 I = 1 # Infectados
-n = 20 # N° de pessoas no espaço
+n = 8 # N° de pessoas no espaço
 p = 8 # l/min
-q = 570 # quanta/h
-t_horas = 3 # horas
+q = 140 # quanta/h
+t_horas = 2 # horas
 
 init_printing(use_unicode=True)
 t = symbols('t')
@@ -32,7 +32,7 @@ def fracao_reinalada(C, Co, Ca):
 # Fração reinalada média:
 def fracao_reinalada_media(C, Co, Ca):
     global df
-    df = integrate(((C-Co)/Ca), (t, 0, 3))
+    df = integrate(((C-Co)/Ca), (t, 0, 2))
     return df
 
 # Concentração Quântica no Espaço:
@@ -51,7 +51,7 @@ def u(p, t_horas, dN):
 def Probability(du):
     global P
     P = 1 - exp(-du)
-    return P
+    return P*100
 
 # Número reprodutivo básico em um espaço aéreo interno compartilhado ( Ra0 )
 def Ra0(du, n):
@@ -65,25 +65,24 @@ def fracao_critica(q, t_horas, n):
     global fc
     if n <= 30:
         fc = (1/q*t_horas)*(ln((n - 1) / (n - 2)))**n
-        return fc
+        return fc*100
     else:
         fc = 1/q*t_horas
-        return fc
+        return fc*100
     
 if __name__ == "__main__":
     
     f = fracao_reinalada(C, Co, Ca)
-    print("Fração reinalada: ", f) 
+    print(f"Fração reinalada: {f} ppm") 
     df = fracao_reinalada_media(C, Co, Ca)
-    print("Fração reinalada média:", df)
+    print(f"Fração reinalada média: {df} ppm")
     dN = concentracao_q_media(df, I, q, n, p)
-    print("Concentração Quântica no Espaço:", dN)
+    print(f"Concentração Quântica no Espaço: {dN} quanta/m^3")
     du = u(p, t_horas, dN)
     print("O n° médio de quanta repirado por uma pessoa:", du)
     p = Probability(du)
-    print("Probabilidade de Infecção: ", p)
+    print(f"Probabilidade de Infecção: {p} %")
     R = Ra0(du, n)
-    print("Número reprodutivo básico em um espaço aéreo interno compartilhado: ", R)
+    print(f"Número reprodutivo básico em um espaço aéreo interno compartilhado: {R} %")
     fc = fracao_critica(q, t_horas, n)
-    print("Fração Reinalada Crítica: ", fc)
-    
+    print(f"Fração Reinalada Crítica: {fc} %")
