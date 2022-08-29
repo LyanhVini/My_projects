@@ -1,0 +1,89 @@
+from sympy import *
+from numpy import log as ln
+import seaborn as sns
+
+"""
+    - Rinovirus = 10/h quanta
+    - Sarampo = 570/h quanta
+"""
+
+
+# Constantes:
+
+C = 400 # ppm
+Co = 350 #ppm
+Ca = 37500 # ppm
+I = 1 # Infectados
+n = 20 # N° de pessoas no espaço
+p = 8 # l/min
+q = 570 # quanta/h
+t_horas = 3 # horas
+
+init_printing(use_unicode=True)
+t = symbols('t')
+
+# EQUATIONS:
+# fração reinalada:
+def fracao_reinalada(C, Co, Ca):
+    global f
+    f = (C - Co) / Ca
+    return f
+
+# Fração reinalada média:
+def fracao_reinalada_media(C, Co, Ca):
+    global df
+    df = integrate(((C-Co)/Ca), (t, 0, 3))
+    return df
+
+# Concentração Quântica no Espaço:
+def concentracao_q_media(df, I, q, n, p):
+    global dN
+    dN = (df*I*q) / (n*p)
+    return dN
+    
+# O n° médio de quanta repirado por uma pessoa:
+def u(p, t_horas, dN):
+    global du
+    du = p*t_horas*dN
+    return du
+
+# Probabilidade de Infecção:
+def Probability(du):
+    global P
+    P = 1 - exp(-du)
+    return P
+
+# Número reprodutivo básico em um espaço aéreo interno compartilhado ( Ra0 )
+def Ra0(du, n):
+    # I = 1 e S(n° de suscetíveis) = n - 1
+    global Ra0 
+    Ra0 = (n-1)*(1 - exp(-du))
+    return Ra0
+
+# Fração de Reinalação Crítica (Fc): Recíproco do n° de quanta que um infectante libera em um edifício
+def fracao_critica(q, t_horas, n):
+    global fc
+    if n <= 30:
+        fc = (1/q*t_horas)*(ln((n - 1) / (n - 2)))**n
+        return fc
+    else:
+        fc = 1/q*t_horas
+        return fc
+    
+if __name__ == "__main__":
+    
+    f = fracao_reinalada(C, Co, Ca)
+    print("Fração reinalada: ", f) 
+    df = fracao_reinalada_media(C, Co, Ca)
+    print("Fração reinalada média:", df)
+    dN = concentracao_q_media(df, I, q, n, p)
+    print("Concentração Quântica no Espaço:", dN)
+    du = u(p, t_horas, dN)
+    print("O n° médio de quanta repirado por uma pessoa:", du)
+    p = Probability(du)
+    print("Probabilidade de Infecção: ", p)
+    R = Ra0(du, n)
+    print("Número reprodutivo básico em um espaço aéreo interno compartilhado: ", R)
+    fc = fracao_critica(q, t_horas, n)
+    print("Fração Reinalada Crítica: ", fc)
+    
