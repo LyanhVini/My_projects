@@ -6,8 +6,6 @@
 #include <sys/socket.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
-//#include sock.h
-
 
 // -> Variáveis:
 
@@ -43,10 +41,9 @@ int main() {                   // chamada do socket
   fprintf(stderr, "Listening on port %i for clients...\n", PortNumber);
 
   /* Um servidor ouve tradicionalmente indefinidamente*/
-
-  //while (1) {
+  while (1) {
   int i;
-  for (i = 0; i < 2; i++){
+  //for (i = 0; i < 2; i++){
 
     struct sockaddr_in caddr; /* endereço do cliente */
     int len = sizeof(caddr);  /* o comprimento do endereço pode mudar*/
@@ -60,17 +57,48 @@ int main() {                   // chamada do socket
 
     /* lendo o cliente */
     //for (i = 0; i < 2; i++) {
-      char buffer[BuffSize + 1];
-      memset(buffer, '\0', sizeof(buffer));
-      int count = read(client_fd, buffer, sizeof(buffer));
-      if (count > 0) {
-        puts(buffer);
-        write(client_fd, buffer, sizeof(buffer)); /* confirmação de leitura*/
+    char buffer[BuffSize + 1];
+    memset(buffer, '\0', sizeof(buffer));
+    int count = read(client_fd, buffer, sizeof(buffer));
+
+    if (count > 0) {
+      
+      switch (buffer[0])
+      {
+      case '1':
+        printf("Acabou a água ");
+        system("canberra-gtk-play -f acabou-a-agua.wav");
+        break;
+      
+      case '2':
+        printf("Acabou o café");
+        system("canberra-gtk-play -f acabou-o-cafe.wav");
+        break;
+
+      case '3':
+        printf("A água foi abastecida");
+        system("canberra-gtk-play -f agua-abastecida.wav");
+        break;
+      
+      case '4': 
+        printf("O café foi abastecido");
+        system("canberra-gtk-play -f cafe-abastecido.wav");
+        break;
+
+      default:
+        printf("servidor está lendo: ");
+        break;
+      }
+
+      puts(buffer);
+      write(client_fd, buffer, sizeof(buffer)); /* confirmação de leitura*/
     }
     //}
     close(client_fd); /* parar conexão */
   }  /* while(1) */
+
   return 0;
+
 }
 
 // para se comunicar -> echo [msg] | netcat localhost 16340
